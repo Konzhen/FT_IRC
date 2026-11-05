@@ -21,11 +21,8 @@ Parser::Parser(Server* srv) : _srv(srv)
     _commands["PART"] = new Part(_srv);
     _commands["KICK"] = new Kick(_srv);
     _commands["MODE"] = new Mode(_srv);
-    _commands["METEO"] = new Meteo(_srv);
 	_commands["PRIVMSG"] = new PrivMsg(_srv);
 	_commands["NOTICE"] = new Notice(_srv);
-    _commands["INVITE"] = new Invite(_srv);
-    _commands["TOPIC"] = new Topic(srv);
 }
 
 Parser::Parser(Parser const &parser)
@@ -50,7 +47,7 @@ Parser::~Parser()
 
 Parser    &Parser::operator=(Parser const &parser)
 {
-    (void)parser;
+	_srv = parser._srv;
     return (*this);
 }
 
@@ -112,4 +109,3 @@ void            Parser::invoke(Client* client, const std::string& message)
         }
     }
 }
-

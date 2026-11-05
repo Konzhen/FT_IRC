@@ -202,34 +202,4 @@ class Mode : public Command
         void    execute(Client* client, std::vector<std::string> args);
 };
 
-class Meteo : public Command
-{
-    public:
-
-        Meteo(Server* srv);
-        ~Meteo();
-
-        void    execute(Client* client, std::vector<std::string> args);
-};
-
-class Invite : public Command
-{
-    public:
-
-        Invite(Server* srv);
-        ~Invite();
-
-        void    execute(Client* client, std::vector<std::string> args);
-};
-
-class Topic : public Command
-{
-    public:
-
-        Topic(Server* srv);
-        ~Topic();
-
-        void    execute(Client* client, std::vector<std::string> args);
-};
-
 #endif

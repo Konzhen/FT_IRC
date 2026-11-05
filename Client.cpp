@@ -31,7 +31,7 @@ Client::~Client()
 
 Client    &Client::operator=(Client const &client)
 {
-     (void)client;
+	_fd = client._fd;
     return (*this);
 }
 
@@ -163,7 +163,6 @@ void            Client::join(Channel* channel)
     reply(RPL_NAMREPLY(_nickname, channel->get_name(), users));
     reply(RPL_ENDOFNAMES(_nickname, channel->get_name()));
     channel->broadcast(RPL_JOIN(get_prefix(), channel->get_name()));
-    reply(channel->get_topic());
     std::string message = _nickname + " has joined to the channel " + channel->get_name();
     log(message);
 }

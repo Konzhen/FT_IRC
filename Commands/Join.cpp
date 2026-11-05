@@ -23,11 +23,8 @@ void    Join::execute(Client* client, std::vector<std::string> args)
 		client->reply(ERR_TOOMANYCHANNELS(client->get_nickname(), name));
 		return;
 	}
-  if (name.at(0) != '#')
-    return;
 
   channel = _srv->get_channel(name);
-
 	if (!channel)
 		channel = _srv->create_channel(name, pass, client);
 
@@ -43,10 +40,5 @@ void    Join::execute(Client* client, std::vector<std::string> args)
 		return;
 	}
 
-  if (channel->get_invite() == true)
-  {
-      client->reply(ERR_CHANOPRIVSNEEDED(client->get_nickname(), name));
-      return;
-  }
 	client->join(channel);
 }

@@ -2,7 +2,7 @@ NAME = ircserv
 
 CC = c++
 
-FLAGS = -g -Wall -Werror -Wextra -fPIE -std=c++98
+FLAGS = -g -Wall -Wextra -Werror -std=c++98
 
 SRCS =	main.cpp			\
 	Channel.cpp				\
@@ -22,10 +22,8 @@ SRCS =	main.cpp			\
 	Commands/Ping.cpp		\
 	Commands/Pong.cpp		\
 	Commands/Join.cpp		\
-	Commands/Meteo.cpp		\
-	Commands/Invite.cpp		\
-	Commands/Topic.cpp		\
 	
+
 OBJS = $(SRCS:.cpp=.o)
 
 %.o : %.cpp
@@ -37,17 +35,11 @@ $(NAME): $(OBJS)
 	$(CC) $(FLAGS) $(OBJS) -o $(NAME)
 
 clean:
-	rm -f $(OBJS) weather.json
-	make clean -C Bot/
+	rm -f $(OBJS)
 	
 fclean: clean
-	rm -f $(NAME) weather.json
-	make fclean -C Bot/
-
+	rm -f $(NAME)
 
 re: fclean all
-
-bonus: all
-	make -C Bot/
 	
 .PHONY: all clean fclean re bonus

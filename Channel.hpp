@@ -23,14 +23,11 @@ typedef std::vector<Client *>::iterator client_iterator;
     private:
                            // - VARIABLES - //
     std::string             _name;
-    std::string             _topic;
     Client*                 _admin;
     std::vector<Client *>   _clients;
     std::string             _k;
     size_t                  _l;
     bool                    _n;
-    bool                    _i;
-    bool                    _o;
 
                            // - FUNCTIONS - //
 
@@ -71,6 +68,7 @@ typedef std::vector<Client *>::iterator client_iterator;
                            // - VARIABLES - //
 
 
+
                            // - FUNCTIONS - //
 
     // Constructor & Destructors
@@ -83,16 +81,9 @@ typedef std::vector<Client *>::iterator client_iterator;
     // Operators
     Channel &operator=(Channel const &channel);
 
-    // Getters & Setters-
+    // Getters & Setters
     std::string                 get_name() const;
-    std::string                 get_topic() const;
-    void                        set_topic(std::string topic);
-    bool                        get_oponly() const;
-    void                        set_oponly(bool oponly);
-    bool                        get_invite() const;
-    void                        set_invite(bool invite);
     Client*                     get_admin() const;
-    void                        set_admin(Client *user);
     std::string                 get_key() const;
     void                        set_key(std::string key);
     size_t                      get_limit() const;
@@ -108,7 +99,6 @@ typedef std::vector<Client *>::iterator client_iterator;
     void                        add_client(Client* client);
     void                        remove_client(Client* client);
     void                        kick(Client* client, Client* target, const std::string& reason);
-    void                        invite(Client* client, Client* target);
 
 };
 

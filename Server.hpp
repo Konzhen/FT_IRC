@@ -30,10 +30,12 @@ class Server;
 //--------------------------------------------------------------------------//
 //                                 - CLASS -                                    //
 //--------------------------------------------------------------------------//
-#define MAX_CONNECTIONS 200
+#define MAX_CONNECTIONS 9999
 
 class Server
 {
+typedef std::vector<int>::iterator          blacklist_iterator;
+typedef std::vector<pollfd>::iterator         pfd_iterator;
 typedef std::vector<Channel *>::iterator    channel_iterator;
 typedef std::map<int, Client *>::iterator   client_iterator;
 
@@ -43,16 +45,15 @@ typedef std::map<int, Client *>::iterator   client_iterator;
     bool                    _dc;
     int                     _running;
     int                     _sock;
-    int                     _size;
     const std::string       _host;
     const std::string       _port;
     const std::string       _pass;
-    struct pollfd           _pfds[MAX_CONNECTIONS];
+    std::vector<int>        _blacklist;
+    std::vector<pollfd>     _pfds;
     std::vector<Channel *>  _channels;
     std::map<int, Client *> _clients;
     Parser*                 _parser;
     sig_atomic_t*           _stopRequest;
-    sig_atomic_t*           _botStatus;
 
                            // - FUNCTIONS - //
 
@@ -107,9 +108,7 @@ typedef std::map<int, Client *>::iterator   client_iterator;
         std::string     get_password() const;
         Client*         get_client(const std::string &nickname);
         Channel*        get_channel(const std::string &name);
-        sig_atomic_t*   get_botStatus();
         void            set_stop(sig_atomic_t* stop);
-        void            set_bot(sig_atomic_t* bot);
 
     // Member Functions
     void            start();

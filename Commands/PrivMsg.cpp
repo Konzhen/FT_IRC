@@ -40,16 +40,6 @@ void    PrivMsg::execute(Client* client, std::vector<std::string> args)
             client->reply(ERR_NOSUCHCHANNEL(client->get_nickname(), target));
 			return;
         }
-        if(target == client->get_channel()->get_name())
-        {
-            channel->broadcast(RPL_PRIVMSG(client->get_prefix(), target, message), client);
-
-            std::cout << "{" << target << "} ";
-            if (client->get_nickname() == channel->get_admin()->get_nickname())
-                std::cout << "@";
-            std::cout << client->get_nickname() << ": " << message << std::endl;
-            return;
-        }
         if (!channel->ext_msg())
         {
             std::vector<std::string> nicknames = channel->get_nicknames();
@@ -68,6 +58,16 @@ void    PrivMsg::execute(Client* client, std::vector<std::string> args)
                 client->reply(ERR_CANNOTSENDTOCHAN(client->get_nickname(), target));
                 return;
             }
+        }
+        
+        if(target == "#" + client->get_channel()->get_name())
+        {
+            channel->broadcast(RPL_PRIVMSG(client->get_prefix(), target, message), client);
+            std::cout << "{" << target << "} ";
+            if (client->get_nickname() == channel->get_admin()->get_nickname())
+                std::cout << "@";
+            std::cout << client->get_nickname() << ": " << message << std::endl;
+            return;
         }
     }
 

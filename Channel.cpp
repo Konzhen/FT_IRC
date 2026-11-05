@@ -9,14 +9,13 @@ Channel::Channel()
 
 }
 
-Channel::Channel(const std::string& name, const std::string& key, Client* admin) : _name(name), _admin(admin), _k(key), _l(0), _n(true), _i(false), _o(false)
+Channel::Channel(const std::string& name, const std::string& key, Client* admin) : _name(name), _admin(admin), _k(key), _l(0), _n(true)
 {
 
 }
 
 Channel::Channel(Channel const &channel)
 {
-
     *this = channel;
 }
 
@@ -32,7 +31,7 @@ Channel::~Channel()
 
 Channel    &Channel::operator=(Channel const &channel)
 {
-    (void)channel;
+	_name = channel._name; 
     return (*this);
 }
 
@@ -50,11 +49,6 @@ Client*                     Channel::get_admin() const
      return (_admin);
 }
 
-void                        Channel::set_admin(Client *user)
-{
-    _admin = user;
-}
-
 std::string                 Channel::get_key() const 
 {
      return (_k); 
@@ -65,16 +59,6 @@ void                        Channel::set_key(std::string key)
      _k = key; 
 }
 
-std::string                 Channel::get_topic() const 
-{
-     return (_topic);
-}
-
-void                        Channel::set_topic(std::string topic) 
-{
-    _topic = topic;
-}
-
 size_t                      Channel::get_limit() const 
 {
      return (_l); 
@@ -83,26 +67,6 @@ size_t                      Channel::get_limit() const
 void                        Channel::set_limit(size_t limit) 
 {
     _l = limit; 
-}
-
-bool                      Channel::get_oponly() const 
-{
-     return (_o); 
-}
-
-void                        Channel::set_oponly(bool oponly) 
-{
-    _o = oponly; 
-}
-
-bool                      Channel::get_invite() const 
-{
-     return (_i); 
-}
-
-void                        Channel::set_invite(bool invite) 
-{
-    _i = invite; 
 }
 
 void                        Channel::set_ext_msg(bool flag) 
@@ -196,13 +160,6 @@ void                        Channel::remove_client(Client* client)
         std::string message = client->get_nickname() + " is now the admin of the channel " + _name;
         log(message);
     }
-}
-
-void                        Channel::invite(Client* client, Client *target)
-{
-    this->broadcast(RPL_INVITE(client->get_prefix(), _name, target->get_nickname()));
-    std::string message = client->get_nickname() + " invited " + target->get_nickname() + " to the channel " + _name;
-    log(message);
 }
 
 void                        Channel::kick(Client* client, Client* target, const std::string& reason)

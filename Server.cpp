@@ -18,16 +18,15 @@ Server::Server(const std::string &port, const std::string &pass) : _host("127.0.
 {
     _dc = false;
     _running = 1;
-    _size = 1;
     _sock = create_socket();
     _parser = new Parser(this);
 }
 
 Server::~Server() 
 {
-    delete _parser;
     for (size_t i = 0; i < _channels.size(); i++)
         delete _clients[i];
+    delete _parser;
 }
 
 
@@ -37,7 +36,7 @@ Server::~Server()
 
 Server    &Server::operator=(Server const &server)
 {
-    (void)server;
+	(void)server;
     return (*this);
 }
 
@@ -48,11 +47,6 @@ Server    &Server::operator=(Server const &server)
 std::string     Server::get_password() const 
 {
     return (_pass);
-}
-
-sig_atomic_t*     Server::get_botStatus()
-{
-    return (_botStatus);
 }
 
 Client*         Server::get_client(const std::string& nickname)
@@ -87,11 +81,6 @@ void            Server::set_stop(sig_atomic_t *stop)
 {
     _stopRequest = stop;
 }
-
-void            Server::set_bot(sig_atomic_t *bot)
-{
-    _botStatus = bot;
-}
 //--------------------------------------------------------------------------//
 //                           - MEMBER FUNCTIONS -                           //
 //--------------------------------------------------------------------------//
@@ -100,43 +89,35 @@ void            Server::start()
 {
     short rv = 0;
     pollfd srv = {_sock, POLLIN, rv};
-    _pfds[0] = srv;
-    int i = 0;
+    _pfds.push_back(srv);
 
     log("Server is listening...");
-jump:
     while (_running)
     {
-        if (poll(_pfds, _size, -1) < 0)
+        if (poll(_pfds.begin().base(), _pfds.size(), -1) < 0)
         {
             if (*_stopRequest == false)
             {
                 std::cout << "\nSIGINT received, ending server protocol." << std::endl;
                 say_goodbye();
-                exit(0);
+                return ;
             }
-            if (*_botStatus == true)
-                goto jump;
-            if (*_botStatus == false)
-                goto jump;
             throw std::runtime_error("Error while polling from fd!");
         }
-        for (i = 0; i != _size; i++)
+        for (pfd_iterator it = _pfds.begin(); it != _pfds.end(); it++)
         {
-            if (i >= _size)
-                break;
-            if (_pfds[i].revents == 0)
+            if (it->revents == 0)
                 continue;
-            if ((_pfds[i].revents & POLLHUP) == POLLHUP)
+            if ((it->revents & POLLHUP) == POLLHUP)
                 break;
-            if ((_pfds[i].revents & POLLIN) == POLLIN)
+            if ((it->revents & POLLIN) == POLLIN)
             {
-                if (_pfds[i].fd == _sock)
+                if (it->fd == _sock)
                 {
                     this->on_client_connect();
                     break;
                 }
-                this->on_client_message(_pfds[i].fd);
+                this->on_client_message(it->fd);
             }
         }
     }
@@ -144,17 +125,17 @@ jump:
 
 void            Server::on_client_connect()
 {
-    int         fd;
+    int  fd;
     sockaddr_in addr = {};
     socklen_t   size = sizeof(addr);
     short       rv = 0;
 
     fd = accept(_sock, (sockaddr *) &addr, &size);
     if (fd < 0)
-        throw std::runtime_error("Error while accepting a new client!"); 
+        throw std::runtime_error("Error while accepting a new client!");
+
     struct pollfd pfd = {fd, POLLIN, rv};
-    _pfds[_size] = pfd;
-    _size++;
+    _pfds.push_back(pfd);
 
     char hostname[NI_MAXHOST]; // defini a 1000 par sys/
     int res = getnameinfo((struct sockaddr *) &addr, sizeof(addr), hostname, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
@@ -179,25 +160,21 @@ void            Server::on_client_disconnect(int fd)
 		sprintf(message, "%s:%d has disconnected!", client->get_hostname().c_str(), client->get_port());
 		log(message);
         _clients.erase(fd);
-        int i = 1;
+
+        pfd_iterator it_b = _pfds.begin();
+        pfd_iterator it_e = _pfds.end();
         
-        while (i != _size)
+        while (it_b != it_e)
         {
-            if (_pfds[i].fd == fd)
+            if (it_b->fd == fd)
             {
+                _pfds.erase(it_b);
                 close(fd);
-                while(i != _size)
-                {
-                    _pfds[i] = _pfds[i+1];
-                    i++;
-                }
                 break;
             }
-            i++;
+            it_b++;
         }
         delete client;
-        _size--;
-        return ;
     }
     catch (const std::exception &e)
     {
@@ -233,7 +210,6 @@ void            Server::say_goodbye()
         delete it_b->second;
         it_b++;
     }
-    _clients.clear();
 
     channel_iterator ch_b = _channels.begin();
     channel_iterator ch_e = _channels.end();
@@ -243,13 +219,17 @@ void            Server::say_goodbye()
         delete *ch_b;
         ch_b++;
     }
-    _channels.~vector();
 
-    for (int i = 1; i != _size; i++)
-        close (_pfds[i].fd);
+    pfd_iterator pfd_b = _pfds.begin();
+    pfd_iterator pfd_e = _pfds.end();
+        
+    while (pfd_b != pfd_e)
+    {
+        close (pfd_b->fd);
+        pfd_b++;
+    }
     shutdown(_sock, SHUT_RDWR);
     close(_sock);
-    delete(_parser);
 }
 
 std::string     Server::read_message(int fd)
